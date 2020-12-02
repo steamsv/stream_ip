@@ -19,3 +19,33 @@
 198.45.48.0/20
 207.45.72.0/22
 208.75.76.0/22
+
+示例
+环境centos7.6 已停止firewalld 其它环境自行百度
+
+一.安装iptables-services
+yum install iptables-services
+控制命令
+systemctl start iptables.service
+systemctl status iptables.service
+systemctl enable iptables.service
+systemctl restart iptables.service
+或
+service iptables restart
+依次
+
+二.开启内核转发
+编辑/etc/sysctl.conf
+增加或修改以下两行，有注释就去掉注释，保持即可
+net.ipv4.ip_forward=1
+net.ipv6.conf.all.forwarding=1
+保存后执行sysctl -p生效
+
+三.以下命令依次将上列网段添加到iptables（80端口非必要，大部分网站都是443；DNS/SNI，SNI优先，没标SNI填DNS）
+iptables -t nat -A PREROUTING -d 8.41.4.0/24 -p tcp --dport 80 -j DNAT --to-destination DNS/SNI:80
+iptables -t nat -A PREROUTING -d 8.41.4.0/24 -p tcp --dport 443 -j DNAT --to-destination DNS/SNI:443
+
+完成后执行service iptables save保存规则
+最后重启iptables执行service iptables restart
+
+以上 完毕
